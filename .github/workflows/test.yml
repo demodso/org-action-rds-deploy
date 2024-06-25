@@ -1,0 +1,54 @@
+name: Test RDS Deploy Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-rds-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+          aws-region: us-west-2
+
+      - name: Test RDS Deploy Action
+        uses: ./
+        with:
+          aws_region: "us-west-2"
+          instance_class: "db.t3.micro"
+          db_name: "testdb"
+          db_username: ${{ secrets.TEST_DB_USERNAME }}
+          db_password: ${{ secrets.TEST_DB_PASSWORD }}
+          db_instance_name: "test-rds-instance"
+
+      - name: Verify RDS Instance
+        run: |
+          # Wait for the RDS instance to be available
+          aws rds wait db-instance-available --db-instance-identifier test-rds-instance
+
+          # Describe the RDS instance
+          aws rds describe-db-instances --db-instance-identifier test-rds-instance
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Delete the RDS instance
+          aws rds delete-db-instance --db-instance-identifier test-rds-instance --skip-final-snapshot --delete-automated-backups
+
+          # Wait for the RDS instance to be deleted
+          aws rds wait db-instance-deleted --db-instance-identifier test-rds-instance
+
+env:
+  AWS_DEFAULT_REGION: us-west-2

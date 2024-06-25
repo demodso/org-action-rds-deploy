@@ -1,0 +1,62 @@
+name: 'Deploy RDS Instance'
+description: 'Deploy a PostgreSQL RDS instance using Terraform'
+inputs:
+  aws_access_key_id:
+    description: 'AWS Access Key ID'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS Secret Access Key'
+    required: true
+  aws_region:
+    description: 'AWS region'
+    required: true
+    default: 'us-west-2'
+  instance_class:
+    description: 'RDS instance class'
+    required: true
+    default: 'db.t3.micro'
+  db_name:
+    description: 'Database name'
+    required: true
+  db_username:
+    description: 'Database username'
+    required: true
+  db_password:
+    description: 'Database password'
+    required: true
+  db_instance_name:
+    description: 'Name tag for the RDS instance'
+    required: true
+    default: 'Demo RDS Instance'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v1
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+      shell: bash
+    - name: Terraform Apply
+      run: |
+        terraform apply -auto-approve \
+          -var="aws_region=${{ inputs.aws_region }}" \
+          -var="instance_class=${{ inputs.instance_class }}" \
+          -var="db_name=${{ inputs.db_name }}" \
+          -var="db_username=${{ inputs.db_username }}" \
+          -var="db_password=${{ inputs.db_password }}" \
+          -var="db_instance_name=${{ inputs.db_instance_name }}"
+      working-directory: ./terraform
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
+
+outputs:
+  rds_endpoint:
+    description: "The connection endpoint for the RDS instance"
+    value: ${{ steps.terraform-output.outputs.rds_endpoint }}
+  rds_port:
+    description: "The port the RDS instance is listening on"
+    value: ${{ steps.terraform-output.outputs.rds_port }}
