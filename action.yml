@@ -10,7 +10,7 @@ inputs:
   aws_region:
     description: 'AWS region'
     required: true
-    default: 'us-west-2'
+    default: 'ap-southeast-2'
   instance_class:
     description: 'RDS instance class'
     required: true

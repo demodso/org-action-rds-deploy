@@ -4,7 +4,7 @@ This GitHub Action deploys a PostgreSQL RDS instance on AWS using Terraform.
 
 ## Inputs
 
-- `aws_region`: AWS region to deploy the RDS instance (default: 'us-west-2')
+- `aws_region`: AWS region to deploy the RDS instance (default: 'ap-southeast-2')
 - `instance_class`: RDS instance class (default: 'db.t3.micro')
 - `db_name`: Name of the database to create
 - `db_username`: Master username for the RDS instance
@@ -22,7 +22,7 @@ This GitHub Action deploys a PostgreSQL RDS instance on AWS using Terraform.
 - name: Deploy RDS Instance
   uses: demodso/org-action-rds-deploy@v1
   with:
-    aws_region: "us-west-2"
+    aws_region: "ap-southeast-2"
     instance_class: "db.t3.micro"
     db_name: "mydb"
     db_username: ${{ secrets.DB_USERNAME }}
